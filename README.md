@@ -1,2 +1,4 @@
 # EncantoPiata1005
-Para acompanhar nosso pagamento das nossas parcelas e todas as mudanças do nosso apartamento. Uma página de Bubu e Dudu Colombiano.
+Para acompanhar nosso pagamento das nossas parcelas e todas as mudanças do nosso apartamento. 
+Uma página de Bubu e Dudu Colombiano.
+Aqui é uma parte dos nossos sonhos !
