@@ -97,28 +97,13 @@
             border-radius: 30px;
             font-size: 0.8rem;
         }
-        .btn-reset {
-            background: #fee2e2;
-            color: #b91c1c;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 40px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.2s;
-            font-size: 0.85rem;
-            margin-left: auto;
-        }
-        .btn-reset:hover {
-            background: #fecaca;
-        }
 
         /* ── Tabela com cabeçalho fixo ── */
         .table-wrapper {
             border: 1px solid #e2e8f0;
             border-radius: 12px;
             overflow: hidden;
-            max-height: 550px;        /* altura máxima com rolagem */
+            max-height: 550px;
             overflow-y: auto;
             position: relative;
         }
@@ -150,7 +135,6 @@
         .table-wrapper tbody tr:last-child td {
             border-bottom: none;
         }
-        /* Cores de status */
         .table-wrapper tbody tr.pago td {
             background: #f0fdf4;
         }
@@ -229,7 +213,6 @@
             .container { padding: 12px; }
             .stats { gap: 8px; font-size: 0.8rem; }
             .progress-area { flex-direction: column; align-items: stretch; }
-            .btn-reset { margin-left: 0; }
             .table-wrapper { max-height: 400px; }
         }
     </style>
@@ -260,7 +243,7 @@
             <span>📅 Restam: <span id="restamCount">0</span> meses</span>
             <span class="badge">Total: <span id="totalCount">0</span></span>
         </div>
-        <button class="btn-reset" id="btnReset">↺ Resetar</button>
+        <!-- BOTÃO RESET REMOVIDO -->
     </div>
 
     <!-- TABELA COM CABEÇALHO FIXO -->
@@ -439,7 +422,7 @@
                 if (isPago) pagas++;
                 const classeLinha = isPago ? 'pago' : 'nao-pago';
                 const checked = isPago ? 'checked' : '';
-                const disabled = isPago ? 'disabled' : '';  // se pago, desabilita
+                const disabled = isPago ? 'disabled' : '';
 
                 let tipoBadge = 'pre-chaves';
                 if (p.desc === 'PARC. TENDA') tipoBadge = 'tenda';
@@ -476,26 +459,20 @@
             restamSpan.textContent = restam;
             totalSpan.textContent = total;
 
-            // Evento de mudança – só permite marcar, não desmarcar
+            // Evento – só permite marcar, não desmarcar
             document.querySelectorAll('.checkbox-pago').forEach(cb => {
                 cb.addEventListener('change', function() {
                     const idx = parseInt(this.dataset.index);
                     const estado = carregarEstado();
 
-                    // Se o checkbox foi marcado (checked == true) e antes não estava pago,
-                    // então salvamos como pago e desabilitamos.
                     if (this.checked) {
-                        // Verifica se já estava pago (por segurança)
                         if (!estado[idx]) {
                             estado[idx] = true;
                             salvarEstado(estado);
-                            // Desabilita o checkbox para impedir desmarcar
                             this.disabled = true;
-                            renderizar(); // re-render para atualizar cores e stats
+                            renderizar();
                         }
                     } else {
-                        // Se o usuário tentou desmarcar, revertemos (pois está disabled, mas por via das dúvidas)
-                        // Como está disabled, o usuário não consegue clicar, mas se chegar aqui via outro meio, forçamos checked.
                         this.checked = true;
                     }
                 });
@@ -505,14 +482,6 @@
         // --------------------------------------------------------------
         // BOTÕES DE CONTROLE
         // --------------------------------------------------------------
-        document.getElementById('btnReset').addEventListener('click', function() {
-            if (confirm('Tem certeza que deseja resetar todos os pagamentos?')) {
-                const vazio = new Array(parcelasRaw.length).fill(false);
-                salvarEstado(vazio);
-                renderizar();
-            }
-        });
-
         document.getElementById('btnMarcarTodos').addEventListener('click', function() {
             const todos = new Array(parcelasRaw.length).fill(true);
             salvarEstado(todos);
