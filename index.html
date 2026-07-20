@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle de Parcelas - Ana Carla</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+            padding: 24px;
+            overflow-x: auto;
+        }
+        h1 {
+            font-size: 1.6rem;
+            color: #1e293b;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .subtitle {
+            color: #64748b;
+            font-size: 0.95rem;
+            margin-bottom: 24px;
+            border-left: 4px solid #3b82f6;
+            padding-left: 16px;
+        }
+        .progress-area {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 28px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 16px 30px;
+            border: 1px solid #e2e8f0;
+        }
+        .progress-bar-wrapper {
+            flex: 2;
+            min-width: 200px;
+        }
+        .progress-bar-bg {
+            background: #e2e8f0;
+            height: 20px;
+            border-radius: 40px;
+            overflow: hidden;
+            position: relative;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #3b82f6, #22c55e);
+            border-radius: 40px;
+            transition: width 0.3s ease;
+        }
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            margin-top: 6px;
+            color: #334155;
+        }
+        .stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px 28px;
+            font-size: 0.95rem;
+            background: #ffffff;
+            padding: 8px 16px;
+            border-radius: 40px;
+            border: 1px solid #e2e8f0;
+        }
+        .stats span {
+            font-weight: 600;
+            color: #0f172a;
+        }
+        .stats .badge {
+            background: #dbeafe;
+            color: #1e4c8a;
+            padding: 2px 10px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+        }
+        .btn-reset {
+            background: #fee2e2;
+            color: #b91c1c;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 0.85rem;
+            margin-left: auto;
+        }
+        .btn-reset:hover {
+            background: #fecaca;
+        }
+        .table-wrapper {
+            overflow-x: auto;
+            margin-top: 8px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        th {
+            background: #f1f5f9;
+            color: #1e293b;
+            font-weight: 600;
+            padding: 14px 12px;
+            text-align: left;
+            border-bottom: 2px solid #cbd5e1;
+            white-space: nowrap;
+        }
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #e2e8f0;
+            vertical-align: middle;
+        }
+        tr:last-child td {
+            border-bottom: none;
+        }
+        tr.pago td {
+            background: #f0fdf4;
+        }
+        tr.pago td:first-child {
+            border-left: 4px solid #22c55e;
+        }
+        tr.nao-pago td:first-child {
+            border-left: 4px solid #f43f5e;
+        }
+        .tipo-badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 30px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            background: #e2e8f0;
+            color: #1e293b;
+        }
+        .tipo-badge.pre-chaves {
+            background: #dbeafe;
+            color: #1e4c8a;
+        }
+        .tipo-badge.tenda {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        .tipo-badge.inter {
+            background: #ede9fe;
+            color: #5b21b6;
+        }
+        .valor {
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+        }
+        .vencimento {
+            font-variant-numeric: tabular-nums;
+            white-space: nowrap;
+        }
+        .checkbox-pago {
+            width: 20px;
+            height: 20px;
+            accent-color: #22c55e;
+            cursor: pointer;
+            transform: scale(1.1);
+        }
+        .footer-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 16px;
+        }
+        .btn-marcar-todos {
+            background: #e2e8f0;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 0.85rem;
+            color: #1e293b;
+        }
+        .btn-marcar-todos:hover {
+            background: #cbd5e1;
+        }
+        .btn-marcar-todos.verde {
+            background: #22c55e;
+            color: white;
+        }
+        .btn-marcar-todos.verde:hover {
+            background: #16a34a;
+        }
+        @media (max-width: 600px) {
+            .container { padding: 12px; }
+            .stats { gap: 8px; font-size: 0.8rem; }
+            .progress-area { flex-direction: column; align-items: stretch; }
+            .btn-reset { margin-left: 0; }
+        }
+    </style>
+</head>
+<body>
+<div class="container" id="app">
+    <h1>
+        📋 Posição Financeira – Antecipar Parcelas
+        <span style="font-size: 0.8rem; font-weight: 400; color: #64748b;">Ana Carla</span>
+    </h1>
+    <div class="subtitle">
+        Encanto Piata – F2/004/1005 · Salvador/BA
+    </div>
+
+    <!-- BARRA DE PROGRESSO -->
+    <div class="progress-area">
+        <div class="progress-bar-wrapper">
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-label">
+                <span id="percentText">0%</span>
+                <span id="countText">0 / 0 pagas</span>
+            </div>
+        </div>
+        <div class="stats">
+            <span>✅ Pagas: <span id="pagasCount">0</span></span>
+            <span>📅 Restam: <span id="restamCount">0</span> meses</span>
+            <span class="badge">Total: <span id="totalCount">0</span></span>
+        </div>
+        <button class="btn-reset" id="btnReset">↺ Resetar</button>
+    </div>
+
+    <!-- TABELA -->
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th style="width:40px;">#</th>
+                    <th>Descrição</th>
+                    <th>Tipo</th>
+                    <th style="text-align:right;">Valor</th>
+                    <th>Vencimento</th>
+                    <th style="text-align:center;">Pago?</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                <!-- gerado por JS -->
+            </tbody>
+        </table>
+    </div>
+
+    <div class="footer-actions">
+        <button class="btn-marcar-todos" id="btnMarcarTodos">Marcar todos como pagos</button>
+        <button class="btn-marcar-todos" id="btnDesmarcarTodos">Desmarcar todos</button>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // --------------------------------------------------------------
+        // DADOS EXTRAÍDOS DO PDF (ordenados por data)
+        // --------------------------------------------------------------
+        const parcelasRaw = [
+            // PRÉ‑CHAVES (mensais)
+            { desc: 'PRÉ-CHAVES', tipo: 'MENSAL', valor: 1207.63, venc: '2026-08-10' },
+            { desc: 'PRÉ-CHAVES', tipo: 'MENSAL', valor: 1207.63, venc: '2026-09-10' },
+            { desc: 'PRÉ-CHAVES', tipo: 'INT',     valor: 2313.62, venc: '2026-09-15' },
+            { desc: 'PRÉ-CHAVES', tipo: 'MENSAL', valor: 1207.63, venc: '2026-10-10' },
+            { desc: 'PRÉ-CHAVES', tipo: 'MENSAL', valor: 1207.63, venc: '2026-11-10' },
+            { desc: 'PRÉ-CHAVES', tipo: 'MENSAL', valor: 1207.63, venc: '2026-12-10' },
+            { desc: 'PRÉ-CHAVES', tipo: 'MENSAL', valor: 1207.63, venc: '2027-01-10' },
+            { desc: 'PRÉ-CHAVES', tipo: 'MENSAL', valor: 1207.63, venc: '2027-02-10' },
+            { desc: 'PRÉ-CHAVES', tipo: 'MENSAL', valor: 1207.63, venc: '2027-03-10' },
+            { desc: 'PRÉ-CHAVES', tipo: 'INT',     valor: 2313.62, venc: '2027-03-15' },
+            { desc: 'PRÉ-CHAVES', tipo: 'MENSAL', valor: 1207.63, venc: '2027-04-10' },
+            { desc: 'PRÉ-CHAVES', tipo: 'MENSAL', valor: 1207.63, venc: '2027-05-10' },
+            { desc: 'PRÉ-CHAVES', tipo: 'MENSAL', valor: 1207.63, venc: '2027-06-10' },
+            { desc: 'PRÉ-CHAVES', tipo: 'MENSAL', valor: 1207.63, venc: '2027-07-10' },
+            { desc: 'PRÉ-CHAVES', tipo: 'MENSAL', valor: 1207.63, venc: '2027-08-10' },
+            { desc: 'PRÉ-CHAVES', tipo: 'MENSAL', valor: 1207.63, venc: '2027-09-10' },
+            { desc: 'PRÉ-CHAVES', tipo: 'INT',     valor: 2313.62, venc: '2027-09-15' },
+            { desc: 'PRÉ-CHAVES', tipo: 'MENSAL', valor: 1207.63, venc: '2027-10-10' },
+            { desc: 'PRÉ-CHAVES', tipo: 'MENSAL', valor: 1207.63, venc: '2027-11-10' },
+            { desc: 'PRÉ-CHAVES', tipo: 'MENSAL', valor: 1207.63, venc: '2027-12-10' },
+
+            // PARC. TENDA (mensais)
+            { desc: 'PARC. TENDA', tipo: 'MENSAL', valor: 366.44, venc: '2028-02-15' },
+            { desc: 'PARC. TENDA', tipo: 'MENSAL', valor: 366.44, venc: '2028-03-15' },
+            { desc: 'PARC. TENDA', tipo: 'MENSAL', valor: 366.44, venc: '2028-04-15' },
+            { desc: 'PARC. TENDA', tipo: 'MENSAL', valor: 366.44, venc: '2028-05-15' },
+            { desc: 'PARC. TENDA', tipo: 'MENSAL', valor: 366.44, venc: '2028-06-15' },
+            { desc: 'PARC. TENDA', tipo: 'MENSAL', valor: 366.44, venc: '2028-07-15' },
+            { desc: 'PARC. TENDA', tipo: 'MENSAL', valor: 366.44, venc: '2028-08-15' },
+            { desc: 'PARC. TENDA', tipo: 'MENSAL', valor: 366.44, venc: '2028-09-15' },
+            { desc: 'PARC. TENDA', tipo: 'MENSAL', valor: 366.44, venc: '2028-10-15' },
+            { desc: 'PARC. TENDA', tipo: 'MENSAL', valor: 366.44, venc: '2028-11-15' },
+            { desc: 'PARC. TENDA', tipo: 'MENSAL', valor: 366.44, venc: '2028-12-15' },
+            { desc: 'PARC. TENDA', tipo: 'MENSAL', valor: 366.44, venc: '2029-01-15' },
+            { desc: 'PARC. TENDA', tipo: 'MENSAL', valor: 366.44, venc: '2029-02-15' },
+            { desc: 'PARC. TENDA', tipo: 'MENSAL', valor: 366.44, venc: '2029-03-15' },
+            { desc: 'PARC. TENDA', tipo: 'MENSAL', valor: 366.44, venc: '2029-04-15' },
+            { desc: 'PARC. TENDA', tipo: 'MENSAL', valor: 366.44, venc: '2029-05-15' },
+            { desc: 'PARC. TENDA', tipo: 'MENSAL', valor: 366.44, venc: '2029-06-15' },
+            { desc: 'PARC. TENDA', tipo: 'MENSAL', valor: 366.44, venc: '2029-07-15' },
+            { desc: 'PARC. TENDA', tipo: 'MENSAL', valor: 366.44, venc: '2029-08-15' },
+            { desc: 'PARC. TENDA', tipo: 'MENSAL', valor: 366.44, venc: '2029-09-15' },
+            { desc: 'PARC. TENDA', tipo: 'MENSAL', valor: 366.44, venc: '2029-10-15' },
+            { desc: 'PARC. TENDA', tipo: 'MENSAL', valor: 366.44, venc: '2029-11-15' },
+            { desc: 'PARC. TENDA', tipo: 'MENSAL', valor: 366.44, venc: '2029-12-15' },
+            { desc: 'PARC. TENDA', tipo: 'MENSAL', valor: 366.44, venc: '2030-01-15' },
+            { desc: 'PARC. TENDA', tipo: 'MENSAL', valor: 366.44, venc: '2030-02-15' },
+            { desc: 'PARC. TENDA', tipo: 'MENSAL', valor: 366.44, venc: '2030-03-15' },
+            { desc: 'PARC. TENDA', tipo: 'MENSAL', valor: 366.44, venc: '2030-04-15' },
+            { desc: 'PARC. TENDA', tipo: 'MENSAL', valor: 366.44, venc: '2030-05-15' },
+            { desc: 'PARC. TENDA', tipo: 'MENSAL', valor: 366.44, venc: '2030-06-15' },
+            { desc: 'PARC. TENDA', tipo: 'MENSAL', valor: 366.44, venc: '2030-07-15' },
+            { desc: 'PARC. TENDA', tipo: 'MENSAL', valor: 366.44, venc: '2030-08-15' },
+            { desc: 'PARC. TENDA', tipo: 'MENSAL', valor: 366.44, venc: '2030-09-15' },
+            { desc: 'PARC. TENDA', tipo: 'MENSAL', valor: 366.44, venc: '2030-10-15' },
+            { desc: 'PARC. TENDA', tipo: 'MENSAL', valor: 366.44, venc: '2030-11-15' },
+            { desc: 'PARC. TENDA', tipo: 'MENSAL', valor: 366.44, venc: '2030-12-15' },
+            { desc: 'PARC. TENDA', tipo: 'MENSAL', valor: 366.44, venc: '2031-01-15' },
+            { desc: 'PARC. TENDA', tipo: 'MENSAL', valor: 366.44, venc: '2031-02-15' },
+            { desc: 'PARC. TENDA', tipo: 'MENSAL', valor: 366.44, venc: '2031-03-15' },
+            { desc: 'PARC. TENDA', tipo: 'MENSAL', valor: 366.44, venc: '2031-04-15' },
+            { desc: 'PARC. TENDA', tipo: 'MENSAL', valor: 366.44, venc: '2031-05-15' },
+            { desc: 'PARC. TENDA', tipo: 'MENSAL', valor: 366.44, venc: '2031-06-15' },
+            { desc: 'PARC. TENDA', tipo: 'MENSAL', valor: 366.44, venc: '2031-07-15' },
+            { desc: 'PARC. TENDA', tipo: 'MENSAL', valor: 366.44, venc: '2031-08-15' },
+            { desc: 'PARC. TENDA', tipo: 'MENSAL', valor: 366.44, venc: '2031-09-15' },
+            { desc: 'PARC. TENDA', tipo: 'MENSAL', valor: 366.44, venc: '2031-10-15' },
+            { desc: 'PARC. TENDA', tipo: 'MENSAL', valor: 366.44, venc: '2031-11-15' },
+            { desc: 'PARC. TENDA', tipo: 'MENSAL', valor: 366.44, venc: '2031-12-15' },
+            { desc: 'PARC. TENDA', tipo: 'MENSAL', valor: 366.44, venc: '2032-01-15' },
+            { desc: 'PARC. TENDA', tipo: 'MENSAL', valor: 366.44, venc: '2032-02-15' },
+            { desc: 'PARC. TENDA', tipo: 'MENSAL', valor: 366.44, venc: '2032-03-15' },
+            { desc: 'PARC. TENDA', tipo: 'MENSAL', valor: 366.44, venc: '2032-04-15' },
+            { desc: 'PARC. TENDA', tipo: 'MENSAL', valor: 366.44, venc: '2032-05-15' },
+            { desc: 'PARC. TENDA', tipo: 'MENSAL', valor: 366.44, venc: '2032-06-15' },
+            { desc: 'PARC. TENDA', tipo: 'MENSAL', valor: 366.44, venc: '2032-07-15' },
+            { desc: 'PARC. TENDA', tipo: 'MENSAL', valor: 366.44, venc: '2032-08-15' },
+            { desc: 'PARC. TENDA', tipo: 'MENSAL', valor: 366.44, venc: '2032-09-15' },
+            { desc: 'PARC. TENDA', tipo: 'MENSAL', valor: 366.44, venc: '2032-10-15' },
+            { desc: 'PARC. TENDA', tipo: 'MENSAL', valor: 366.44, venc: '2032-11-15' },
+            { desc: 'PARC. TENDA', tipo: 'MENSAL', valor: 366.44, venc: '2032-12-15' },
+            { desc: 'PARC. TENDA', tipo: 'MENSAL', valor: 366.44, venc: '2033-01-15' },
+            { desc: 'PARC. TENDA', tipo: 'MENSAL', valor: 366.44, venc: '2033-02-15' },
+            { desc: 'PARC. TENDA', tipo: 'MENSAL', valor: 366.44, venc: '2033-03-15' },
+            { desc: 'PARC. TENDA', tipo: 'MENSAL', valor: 366.44, venc: '2033-04-15' },
+            { desc: 'PARC. TENDA', tipo: 'MENSAL', valor: 366.44, venc: '2033-05-15' },
+            { desc: 'PARC. TENDA', tipo: 'MENSAL', valor: 366.44, venc: '2033-06-15' },
+            { desc: 'PARC. TENDA', tipo: 'MENSAL', valor: 366.44, venc: '2033-07-15' },
+            { desc: 'PARC. TENDA', tipo: 'MENSAL', valor: 366.44, venc: '2033-08-15' },
+            { desc: 'PARC. TENDA', tipo: 'MENSAL', valor: 366.44, venc: '2033-09-15' },
+            { desc: 'PARC. TENDA', tipo: 'MENSAL', valor: 366.44, venc: '2033-10-15' },
+            { desc: 'PARC. TENDA', tipo: 'MENSAL', valor: 366.44, venc: '2033-11-15' },
+            { desc: 'PARC. TENDA', tipo: 'MENSAL', valor: 366.44, venc: '2033-12-15' },
+            { desc: 'PARC. TENDA', tipo: 'MENSAL', valor: 366.44, venc: '2034-01-15' }
+        ];
+
+        // --------------------------------------------------------------
+        // LÓGICA DE PERSISTÊNCIA (localStorage)
+        // --------------------------------------------------------------
+        const STORAGE_KEY = 'parcelas_pagas';
+
+        function carregarEstado() {
+            try {
+                const dados = localStorage.getItem(STORAGE_KEY);
+                if (dados) return JSON.parse(dados);
+            } catch (e) {}
+            // Inicializa todos como false (não pagos)
+            return new Array(parcelasRaw.length).fill(false);
+        }
+
+        function salvarEstado(pagos) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(pagos));
+        }
+
+        // --------------------------------------------------------------
+        // RENDERIZAÇÃO
+        // --------------------------------------------------------------
+        const tbody = document.getElementById('tableBody');
+        const progressFill = document.getElementById('progressFill');
+        const percentText = document.getElementById('percentText');
+        const countText = document.getElementById('countText');
+        const pagasSpan = document.getElementById('pagasCount');
+        const restamSpan = document.getElementById('restamCount');
+        const totalSpan = document.getElementById('totalCount');
+
+        function formatarData(iso) {
+            const [ano, mes, dia] = iso.split('-');
+            return `${dia}/${mes}/${ano}`;
+        }
+
+        function formatarMoeda(valor) {
+            return 'R$ ' + valor.toFixed(2).replace('.', ',');
+        }
+
+        function obterClasseTipo(tipo) {
+            if (tipo === 'INT') return 'inter';
+            if (tipo === 'MENSAL') {
+                // distinguir PRE-CHAVES de TENDA? vamos usar a descrição
+                return 'pre-chaves'; // padrão, mas alteramos depois
+            }
+            return '';
+        }
+
+        function renderizar() {
+            const pagos = carregarEstado();
+            const total = parcelasRaw.length;
+            let pagas = 0;
+
+            // Construir linhas
+            let html = '';
+            parcelasRaw.forEach((p, index) => {
+                const isPago = pagos[index] || false;
+                if (isPago) pagas++;
+                const classeLinha = isPago ? 'pago' : 'nao-pago';
+                const checked = isPago ? 'checked' : '';
+                // definir classe de tipo para badge
+                let tipoBadge = 'pre-chaves';
+                if (p.desc === 'PARC. TENDA') tipoBadge = 'tenda';
+                if (p.tipo === 'INT') tipoBadge = 'inter';
+                // descrição mais amigável
+                let descricao = p.desc;
+                if (p.tipo === 'INT') descricao += ' (INTERMEDIÁRIA)';
+                html += `
+                    <tr class="${classeLinha}">
+                        <td style="text-align:center; font-weight:500;">${index + 1}</td>
+                        <td>${descricao}</td>
+                        <td><span class="tipo-badge ${tipoBadge}">${p.tipo}</span></td>
+                        <td style="text-align:right;" class="valor">${formatarMoeda(p.valor)}</td>
+                        <td class="vencimento">${formatarData(p.venc)}</td>
+                        <td style="text-align:center;">
+                            <input type="checkbox" class="checkbox-pago" data-index="${index}" ${checked}>
+                        </td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+
+            // Atualizar estatísticas
+            const restam = total - pagas;
+            const percent = total > 0 ? (pagas / total) * 100 : 0;
+            progressFill.style.width = percent + '%';
+            percentText.textContent = percent.toFixed(1) + '%';
+            countText.textContent = `${pagas} / ${total} pagas`;
+            pagasSpan.textContent = pagas;
+            restamSpan.textContent = restam;
+            totalSpan.textContent = total;
+
+            // Adicionar eventos aos checkboxes
+            document.querySelectorAll('.checkbox-pago').forEach(cb => {
+                cb.addEventListener('change', function() {
+                    const idx = parseInt(this.dataset.index);
+                    const estado = carregarEstado();
+                    estado[idx] = this.checked;
+                    salvarEstado(estado);
+                    renderizar(); // re-render para atualizar cores e stats
+                });
+            });
+        }
+
+        // --------------------------------------------------------------
+        // BOTÕES DE CONTROLE
+        // --------------------------------------------------------------
+        document.getElementById('btnReset').addEventListener('click', function() {
+            if (confirm('Tem certeza que deseja resetar todos os pagamentos?')) {
+                const vazio = new Array(parcelasRaw.length).fill(false);
+                salvarEstado(vazio);
+                renderizar();
+            }
+        });
+
+        document.getElementById('btnMarcarTodos').addEventListener('click', function() {
+            const todos = new Array(parcelasRaw.length).fill(true);
+            salvarEstado(todos);
+            renderizar();
+        });
+
+        document.getElementById('btnDesmarcarTodos').addEventListener('click', function() {
+            const nenhum = new Array(parcelasRaw.length).fill(false);
+            salvarEstado(nenhum);
+            renderizar();
+        });
+
+        // --------------------------------------------------------------
+        // INICIALIZAÇÃO
+        // --------------------------------------------------------------
+        renderizar();
+    })();
+</script>
+</body>
+</html>
