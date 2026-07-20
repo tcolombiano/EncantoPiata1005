@@ -112,18 +112,27 @@
         .btn-reset:hover {
             background: #fecaca;
         }
+
+        /* ── Tabela com cabeçalho fixo ── */
         .table-wrapper {
-            overflow-x: auto;
-            margin-top: 8px;
-            border-radius: 12px;
             border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            overflow: hidden;
+            max-height: 550px;        /* altura máxima com rolagem */
+            overflow-y: auto;
+            position: relative;
         }
-        table {
+        .table-wrapper table {
             width: 100%;
             border-collapse: collapse;
             font-size: 0.9rem;
         }
-        th {
+        .table-wrapper thead {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .table-wrapper thead th {
             background: #f1f5f9;
             color: #1e293b;
             font-weight: 600;
@@ -131,24 +140,27 @@
             text-align: left;
             border-bottom: 2px solid #cbd5e1;
             white-space: nowrap;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
-        td {
+        .table-wrapper tbody td {
             padding: 12px;
             border-bottom: 1px solid #e2e8f0;
             vertical-align: middle;
         }
-        tr:last-child td {
+        .table-wrapper tbody tr:last-child td {
             border-bottom: none;
         }
-        tr.pago td {
+        /* Cores de status */
+        .table-wrapper tbody tr.pago td {
             background: #f0fdf4;
         }
-        tr.pago td:first-child {
+        .table-wrapper tbody tr.pago td:first-child {
             border-left: 4px solid #22c55e;
         }
-        tr.nao-pago td:first-child {
+        .table-wrapper tbody tr.nao-pago td:first-child {
             border-left: 4px solid #f43f5e;
         }
+
         .tipo-badge {
             display: inline-block;
             padding: 2px 10px;
@@ -186,6 +198,12 @@
             cursor: pointer;
             transform: scale(1.1);
         }
+        .checkbox-pago:disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+            accent-color: #9ca3af;
+        }
+
         .footer-actions {
             display: flex;
             justify-content: flex-end;
@@ -206,18 +224,13 @@
         .btn-marcar-todos:hover {
             background: #cbd5e1;
         }
-        .btn-marcar-todos.verde {
-            background: #22c55e;
-            color: white;
-        }
-        .btn-marcar-todos.verde:hover {
-            background: #16a34a;
-        }
+
         @media (max-width: 600px) {
             .container { padding: 12px; }
             .stats { gap: 8px; font-size: 0.8rem; }
             .progress-area { flex-direction: column; align-items: stretch; }
             .btn-reset { margin-left: 0; }
+            .table-wrapper { max-height: 400px; }
         }
     </style>
 </head>
@@ -228,7 +241,7 @@
         <span style="font-size: 0.8rem; font-weight: 400; color: #64748b;">AnaThi</span>
     </h1>
     <div class="subtitle">
-        Encanto Piata – Torre 4- apartamento-1005 · Salvador/BA
+        Encanto Piata – Torre 4 - apartamento 1005 · Salvador/BA
     </div>
 
     <!-- BARRA DE PROGRESSO -->
@@ -250,7 +263,7 @@
         <button class="btn-reset" id="btnReset">↺ Resetar</button>
     </div>
 
-    <!-- TABELA -->
+    <!-- TABELA COM CABEÇALHO FIXO -->
     <div class="table-wrapper">
         <table>
             <thead>
@@ -379,7 +392,7 @@
         ];
 
         // --------------------------------------------------------------
-        // LÓGICA DE PERSISTÊNCIA (localStorage)
+        // PERSISTÊNCIA (localStorage)
         // --------------------------------------------------------------
         const STORAGE_KEY = 'parcelas_pagas';
 
@@ -388,7 +401,6 @@
                 const dados = localStorage.getItem(STORAGE_KEY);
                 if (dados) return JSON.parse(dados);
             } catch (e) {}
-            // Inicializa todos como false (não pagos)
             return new Array(parcelasRaw.length).fill(false);
         }
 
@@ -416,34 +428,26 @@
             return 'R$ ' + valor.toFixed(2).replace('.', ',');
         }
 
-        function obterClasseTipo(tipo) {
-            if (tipo === 'INT') return 'inter';
-            if (tipo === 'MENSAL') {
-                // distinguir PRE-CHAVES de TENDA? vamos usar a descrição
-                return 'pre-chaves'; // padrão, mas alteramos depois
-            }
-            return '';
-        }
-
         function renderizar() {
             const pagos = carregarEstado();
             const total = parcelasRaw.length;
             let pagas = 0;
 
-            // Construir linhas
             let html = '';
             parcelasRaw.forEach((p, index) => {
                 const isPago = pagos[index] || false;
                 if (isPago) pagas++;
                 const classeLinha = isPago ? 'pago' : 'nao-pago';
                 const checked = isPago ? 'checked' : '';
-                // definir classe de tipo para badge
+                const disabled = isPago ? 'disabled' : '';  // se pago, desabilita
+
                 let tipoBadge = 'pre-chaves';
                 if (p.desc === 'PARC. TENDA') tipoBadge = 'tenda';
                 if (p.tipo === 'INT') tipoBadge = 'inter';
-                // descrição mais amigável
+
                 let descricao = p.desc;
                 if (p.tipo === 'INT') descricao += ' (INTERMEDIÁRIA)';
+
                 html += `
                     <tr class="${classeLinha}">
                         <td style="text-align:center; font-weight:500;">${index + 1}</td>
@@ -452,14 +456,17 @@
                         <td style="text-align:right;" class="valor">${formatarMoeda(p.valor)}</td>
                         <td class="vencimento">${formatarData(p.venc)}</td>
                         <td style="text-align:center;">
-                            <input type="checkbox" class="checkbox-pago" data-index="${index}" ${checked}>
+                            <input type="checkbox" class="checkbox-pago" 
+                                   data-index="${index}" 
+                                   ${checked} 
+                                   ${disabled}>
                         </td>
                     </tr>
                 `;
             });
             tbody.innerHTML = html;
 
-            // Atualizar estatísticas
+            // Estatísticas
             const restam = total - pagas;
             const percent = total > 0 ? (pagas / total) * 100 : 0;
             progressFill.style.width = percent + '%';
@@ -469,14 +476,28 @@
             restamSpan.textContent = restam;
             totalSpan.textContent = total;
 
-            // Adicionar eventos aos checkboxes
+            // Evento de mudança – só permite marcar, não desmarcar
             document.querySelectorAll('.checkbox-pago').forEach(cb => {
                 cb.addEventListener('change', function() {
                     const idx = parseInt(this.dataset.index);
                     const estado = carregarEstado();
-                    estado[idx] = this.checked;
-                    salvarEstado(estado);
-                    renderizar(); // re-render para atualizar cores e stats
+
+                    // Se o checkbox foi marcado (checked == true) e antes não estava pago,
+                    // então salvamos como pago e desabilitamos.
+                    if (this.checked) {
+                        // Verifica se já estava pago (por segurança)
+                        if (!estado[idx]) {
+                            estado[idx] = true;
+                            salvarEstado(estado);
+                            // Desabilita o checkbox para impedir desmarcar
+                            this.disabled = true;
+                            renderizar(); // re-render para atualizar cores e stats
+                        }
+                    } else {
+                        // Se o usuário tentou desmarcar, revertemos (pois está disabled, mas por via das dúvidas)
+                        // Como está disabled, o usuário não consegue clicar, mas se chegar aqui via outro meio, forçamos checked.
+                        this.checked = true;
+                    }
                 });
             });
         }
